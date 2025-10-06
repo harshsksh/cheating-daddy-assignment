@@ -1,13 +1,37 @@
-if (require('electron-squirrel-startup')) {
-    process.exit(0);
+// Handle Squirrel events only when packaged on Windows; never exit in dev
+try {
+    const handledBySquirrel = require('electron-squirrel-startup');
+    const { app } = require('electron');
+    if (handledBySquirrel && app.isPackaged) {
+        app.quit();
+    }
+} catch (_) {
+    // Module may not exist on non-Windows or during dev; ignore
 }
 
 const { app, BrowserWindow, shell, ipcMain } = require('electron');
-const { createWindow, updateGlobalShortcuts } = require('./utils/window');
-const { setupGeminiIpcHandlers, stopMacOSAudioCapture, sendToRenderer } = require('./utils/gemini');
-const { initializeRandomProcessNames } = require('./utils/processRandomizer');
-const { applyAntiAnalysisMeasures } = require('./utils/stealthFeatures');
-const { getLocalConfig, writeConfig } = require('./config');
+const path = require('node:path');
+
+// Resolve requires correctly whether running from src or from .vite/build/main
+function requireFromApp(relativePathFromSrc) {
+    // 1) Try resolving near current file (dev src execution)
+    try {
+        return require(relativePathFromSrc);
+    } catch (_) {}
+    // 2) Try resolving from project src when executing from .vite/build/main
+    try {
+        const resolved = path.join(__dirname, '..', '..', 'src', relativePathFromSrc.replace(/^\.\//, ''));
+        return require(resolved);
+    } catch (e) {
+        throw e;
+    }
+}
+
+const { createWindow, updateGlobalShortcuts } = requireFromApp('./utils/window');
+const { setupGeminiIpcHandlers, stopMacOSAudioCapture, sendToRenderer } = requireFromApp('./utils/gemini');
+const { initializeRandomProcessNames } = requireFromApp('./utils/processRandomizer');
+const { applyAntiAnalysisMeasures } = requireFromApp('./utils/stealthFeatures');
+const { getLocalConfig, writeConfig } = requireFromApp('./config');
 
 const geminiSessionRef = { current: null };
 let mainWindow = null;

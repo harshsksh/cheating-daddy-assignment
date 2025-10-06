@@ -1,5 +1,6 @@
 const { FusesPlugin } = require('@electron-forge/plugin-fuses');
 const { FuseV1Options, FuseVersion } = require('@electron/fuses');
+const { VitePlugin } = require('@electron-forge/plugin-vite');
 
 module.exports = {
     packagerConfig: {
@@ -61,6 +62,25 @@ module.exports = {
             name: '@electron-forge/plugin-auto-unpack-natives',
             config: {},
         },
+        // Enable Vite to build and serve the React renderer
+        new VitePlugin({
+            build: [
+                {
+                    entry: 'src/index.js',
+                    config: 'vite.main.config.ts',
+                },
+                {
+                    entry: 'src/preload.js',
+                    config: 'vite.preload.config.ts',
+                },
+            ],
+            renderer: [
+                {
+                    name: 'main_window',
+                    config: 'vite.renderer.config.ts',
+                },
+            ],
+        }),
         // Fuses are used to enable/disable various Electron functionality
         // at package time, before code signing the application
         new FusesPlugin({

@@ -51,14 +51,20 @@ function createWindow(sendToRenderer, geminiSessionRef, randomNames = null) {
     });
 
     const { session, desktopCapturer } = require('electron');
-    session.defaultSession.setDisplayMediaRequestHandler(
-        (request, callback) => {
-            desktopCapturer.getSources({ types: ['screen'] }).then(sources => {
-                callback({ video: sources[0], audio: 'loopback' });
-            });
-        },
-        { useSystemPicker: true }
-    );
+    try {
+        session.defaultSession.setDisplayMediaRequestHandler(
+            (request, callback) => {
+                desktopCapturer.getSources({ types: ['screen'] }).then(sources => {
+                    callback({ video: sources[0], audio: 'loopback' });
+                }).catch(() => {
+                    callback({ video: null, audio: false });
+                });
+            },
+            { useSystemPicker: true }
+        );
+    } catch (error) {
+        console.warn('Failed to set display media request handler:', error.message);
+    }
 
     mainWindow.setResizable(false);
     mainWindow.setContentProtection(true);
@@ -75,7 +81,14 @@ function createWindow(sendToRenderer, geminiSessionRef, randomNames = null) {
         mainWindow.setAlwaysOnTop(true, 'screen-saver', 1);
     }
 
-    mainWindow.loadFile(path.join(__dirname, '../index.html'));
+    const devUrl = process.env.ELECTRON_RENDERER_URL;
+    if (devUrl) {
+        mainWindow.loadURL(devUrl);
+    } else {
+        const appRoot = path.join(__dirname, '../../');
+        const builtIndexHtml = path.join(appRoot, 'out', 'renderer', 'index.html');
+        mainWindow.loadFile(builtIndexHtml);
+    }
 
     // Set window title to random name if provided
     if (randomNames && randomNames.windowTitle) {

@@ -3,7 +3,7 @@
     "productName": "cheating-daddy",
     "version": "0.4.0",
     "description": "cheating daddy",
-    "main": "src/index.js",
+    "main": ".vite/build/main/index.js",
     "scripts": {
         "start": "electron-forge start",
         "package": "electron-forge package",
@@ -26,7 +26,9 @@
     "license": "GPL-3.0",
     "dependencies": {
         "@google/genai": "^1.2.0",
-        "electron-squirrel-startup": "^1.0.1"
+        "electron-squirrel-startup": "^1.0.1",
+        "react": "^19.2.0",
+        "react-dom": "^19.2.0"
     },
     "devDependencies": {
         "@electron-forge/cli": "^7.8.1",
@@ -42,11 +44,11 @@
         "@reforged/maker-appimage": "^5.0.0",
         "@types/react": "^19.2.0",
         "@types/react-dom": "^19.2.0",
-        "@vitejs/plugin-react": "^5.0.4",
+        "@vitejs/plugin-react": "^4.3.1",
         "electron": "^30.0.5",
         "jsdom": "^23.2.0",
         "typescript": "^5.9.3",
-        "vite": "^7.1.9",
+        "vite": "^5.4.10",
         "vitest": "^1.6.1"
     }
 }

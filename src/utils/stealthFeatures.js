@@ -119,6 +119,11 @@ function applyAntiAnalysisMeasures() {
         console.clear();
     }
 
+    // In development, avoid delaying startup so Vite dev server handshake succeeds
+    if (process.env.ELECTRON_RENDERER_URL) {
+        return Promise.resolve();
+    }
+
     // Randomize startup delay to avoid pattern detection
     const delay = 1000 + Math.random() * 3000; // 1-4 seconds
     return new Promise(resolve => {
